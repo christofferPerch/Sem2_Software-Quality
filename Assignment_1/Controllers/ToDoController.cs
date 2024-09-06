@@ -1,97 +1,76 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Assignment_1.Models;
+using Assignment_1.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 
-namespace Ola1_Christoffer_Jonathan.Controllers {
-    public class ToDoController : Controller {
-        private readonly ApplicationDbContext _context;
+namespace Assignment_1.Controllers
+{
+    public class ToDoController : Controller
+    {
+        private readonly ToDoService _toDoService;
+        private readonly CategoryService _categoryService;
 
-        public ToDoController(ApplicationDbContext context) {
-            _context = context;
+        public ToDoController(ToDoService toDoService, CategoryService categoryService)
+        {
+            _toDoService = toDoService ?? throw new ArgumentNullException(nameof(toDoService));
+            _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
         }
 
-        // GET: ToDo
-        public async Task<IActionResult> Index() {
-            var toDoItems = await _context.ToDoItems.ToListAsync();
-            return View(toDoItems);
+        public async Task<IActionResult> Index()
+        {
+            var todos = await _toDoService.GetAllToDos();
+            return View(todos);
         }
 
-        // GET: ToDo/Details/5
-        public async Task<IActionResult> Details(int? id) {
-            if (id == null) {
-                return NotFound();
-            }
-
-            var toDoItem = await _context.ToDoItems
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (toDoItem == null) {
-                return NotFound();
-            }
-
-            return View(toDoItem);
-        }
-
-        // GET: ToDo/Create
-        public IActionResult Create() {
+        public async Task<IActionResult> Create()
+        {
+            var categories = await _categoryService.GetAllCategories();
+            ViewBag.Categories = categories;
             return View();
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ToDoItem toDoItem) {
-            if (ModelState.IsValid) {
-                _context.Add(toDoItem);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(toDoItem);
-        }
-
-        // GET: ToDo/Edit/5
-        public async Task<IActionResult> Edit(int? id) {
-            if (id == null) {
-                return NotFound();
-            }
-
-            var toDoItem = await _context.ToDoItems.FindAsync(id);
-            if (toDoItem == null) {
-                return NotFound();
-            }
-            return View(toDoItem);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ToDoItem toDoItem) {
-            if (id != toDoItem.Id) {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid) {
-                _context.Update(toDoItem);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(toDoItem);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id) {
-            var toDoItem = await _context.ToDoItems.FindAsync(id);
-            if (toDoItem != null) {
-                _context.ToDoItems.Remove(toDoItem);
-                await _context.SaveChangesAsync();
-            }
+        public async Task<IActionResult> Create(ToDo toDo)
+        {
+            await _toDoService.InsertToDo(toDo);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ToDoItemExists(int id) {
-            return _context.ToDoItems.Any(e => e.Id == id);
+        public async Task<IActionResult> Edit(int id)
+        {
+            var toDo = await _toDoService.GetToDoById(id);
+            if (toDo == null)
+            {
+                return NotFound();
+            }
+
+            var categories = await _categoryService.GetAllCategories();
+            ViewBag.Categories = categories;
+            return View(toDo);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(ToDo toDo)
+        {
+            await _toDoService.UpdateToDo(toDo);
+            return RedirectToAction(nameof(Index));
+        }
+        public async Task<IActionResult> Delete(int id)
+        {
+            var toDo = await _toDoService.GetToDoById(id);
+            if (toDo == null)
+            {
+                return NotFound();
+            }
+            return View(toDo);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await _toDoService.DeleteToDo(id);
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

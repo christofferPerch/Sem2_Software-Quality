@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ToDoItem>
+﻿@model IEnumerable<Assignment_1.Models.ToDo>
 
 @{
     ViewData["Title"] = "To-Do List";
@@ -6,29 +6,42 @@
 
 <h2>To-Do List</h2>
 
-<table class="table">
+<table class="table table-striped">
     <thead>
         <tr>
+            <th>Title</th>
             <th>Description</th>
+            <th>Deadline</th>
+            <th>Category</th>
+            <th>Completed</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var todo in Model)
         {
             <tr>
-                <td>@item.Description</td>
+                <td>@todo.Title</td>
+                <td>@todo.Description</td>
+                <td>@(todo.Deadline.HasValue ? todo.Deadline.Value.ToString("yyyy-MM-dd") : "No deadline")</td>
+                <td>@todo.Category?.CategoryName</td>
                 <td>
-                    <form asp-controller="ToDo" asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
-
-                    <a asp-controller="ToDo" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">Edit</a>
+                    @if (todo.IsCompleted)
+                    {
+                        <span class="badge bg-success">Yes</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning">No</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@todo.Id" class="btn btn-primary btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@todo.Id" class="btn btn-danger btn-sm">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
-<!-- Button to navigate to the Create page -->
-<a asp-controller="ToDo" asp-action="Create" class="btn btn-success">Create New Task</a>
+<a asp-action="Create" class="btn btn-success">Add New To-Do</a>
