@@ -1,0 +1,11 @@
+config:
+  target: 'https://localhost:7017'  # or your actual HTTPS endpoint
+  phases:
+    - duration: 60  # Test duration (in seconds)
+      arrivalRate: 50  # Simulate 50 users per second
+  tls:
+    rejectUnauthorized: false  # Disable SSL certificate validation
+scenarios:
+  - flow:
+      - get:
+          url: '/api/todo'  # Replace with your API endpoint

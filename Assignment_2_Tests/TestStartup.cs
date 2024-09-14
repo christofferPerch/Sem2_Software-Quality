@@ -1,4 +1,4 @@
-﻿using Assignment_1.Services;
+using Assignment_2.Services;
 using DataAccess;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,10 +7,14 @@ public static class TestStartup
 {
     public static ServiceProvider InitializeServices()
     {
+        var basePath = Directory.GetCurrentDirectory();
+        var configPath = Path.Combine(basePath, "appsettings.Test.json");
+
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.Test.json", optional: false, reloadOnChange: true)
+            .SetBasePath(basePath)
+            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
             .Build();
+
 
         var services = new ServiceCollection();
 

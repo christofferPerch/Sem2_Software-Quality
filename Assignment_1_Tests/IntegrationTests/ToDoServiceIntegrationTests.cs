@@ -161,6 +161,7 @@ namespace Assignment_1_Tests
             CleanupDatabase();
         }
 
+
         private void CleanupDatabase()
         {
             var serviceProvider = TestStartup.InitializeServices();
@@ -175,4 +176,5 @@ namespace Assignment_1_Tests
             dataAccess.Delete(resetIdentitySql, new { }).Wait();
         }
     }
+
 }
