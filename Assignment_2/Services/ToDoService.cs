@@ -50,22 +50,47 @@ namespace Assignment_2.Services
 
         public async Task<int> InsertToDo(ToDo toDo)
         {
+            if (string.IsNullOrWhiteSpace(toDo.Title) || toDo.Title.Length < 1)
+            {
+                throw new ArgumentException("Title must be at least 1 character long.");
+            }
+
+            if (toDo.Title.Length > 100)
+            {
+                throw new ArgumentException("Title cannot be longer than 100 characters.");
+            }
+
             toDo.IsCompleted = false;
+
             var sql = @"
-                INSERT INTO ToDo (Title, Description, Deadline, IsCompleted, CategoryId)
-                VALUES (@Title, @Description, @Deadline, @IsCompleted, @CategoryId)";
+                    INSERT INTO ToDo (Title, Description, Deadline, IsCompleted, CategoryId)
+                    VALUES (@Title, @Description, @Deadline, @IsCompleted, @CategoryId)";
+
             return await _dataAccess.Insert(sql, toDo);
         }
 
+
         public async Task UpdateToDo(ToDo toDo)
         {
+            if (string.IsNullOrWhiteSpace(toDo.Title) || toDo.Title.Length < 1)
+            {
+                throw new ArgumentException("Title must be at least 1 character long.");
+            }
+
+            if (toDo.Title.Length > 100)
+            {
+                throw new ArgumentException("Title cannot be longer than 100 characters.");
+            }
+
             var sql = @"
-                UPDATE ToDo
-                SET Title = @Title, Description = @Description, Deadline = @Deadline, 
-                    IsCompleted = @IsCompleted, CategoryId = @CategoryId
-                WHERE Id = @Id";
+        UPDATE ToDo
+        SET Title = @Title, Description = @Description, Deadline = @Deadline, 
+            IsCompleted = @IsCompleted, CategoryId = @CategoryId
+        WHERE Id = @Id";
+
             await _dataAccess.Update(sql, toDo);
         }
+
 
         public async Task DeleteToDo(int id)
         {

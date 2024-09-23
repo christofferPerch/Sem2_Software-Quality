@@ -100,5 +100,67 @@ namespace Assignment_2_Tests.UnitTests
 
             _mockDataAccess.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
         }
+
+        [Fact]
+        public async Task InsertToDo_RejectsTitleWithLengthBelowMinimum()
+        {
+            var newToDo = new ToDo { Title = "", CategoryId = 1 };  
+
+            await Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _toDoService.InsertToDo(newToDo));
+        }
+
+        [Fact]
+        public async Task InsertToDo_RejectsTitleWithLengthAboveMaximum()
+        {
+            var newToDo = new ToDo { Title = new string('a', 101), CategoryId = 1 };  
+
+            await Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _toDoService.InsertToDo(newToDo));
+        }
+
+        [Fact]
+        public async Task InsertToDo_AcceptsTitleWithValidLength()
+        {
+            var newToDo = new ToDo { Title = new string('a', 50), CategoryId = 1 };  
+
+            _mockDataAccess.Setup(x => x.Insert(It.IsAny<string>(), It.IsAny<ToDo>())).ReturnsAsync(1);
+
+            var result = await _toDoService.InsertToDo(newToDo);
+
+            Assert.Equal(1, result);  
+        }
+
+        [Fact]
+        public async Task InsertToDo_SetsTaskStateToNotCompleted()
+        {
+            var newToDo = new ToDo { Title = "New Task", CategoryId = 1, IsCompleted = false };
+
+            _mockDataAccess.Setup(x => x.Insert(It.IsAny<string>(), It.IsAny<ToDo>()))
+                           .ReturnsAsync(1);
+
+            var result = await _toDoService.InsertToDo(newToDo);
+
+            Assert.Equal(1, result);  
+            Assert.False(newToDo.IsCompleted);  
+        }
+
+        [Fact]
+        public async Task UpdateToDo_ChangesTaskStateToCompleted()
+        {
+            var existingToDo = new ToDo { Id = 1, Title = "Existing Task", CategoryId = 1, IsCompleted = false };
+
+            _mockDataAccess.Setup(x => x.GetById<ToDo>(It.IsAny<string>(), It.IsAny<object>()))
+                           .ReturnsAsync(existingToDo);
+
+            existingToDo.IsCompleted = true;
+
+            await _toDoService.UpdateToDo(existingToDo);
+
+            Assert.True(existingToDo.IsCompleted); 
+        }
+
+
+
     }
 }

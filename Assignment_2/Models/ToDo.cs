@@ -23,6 +23,11 @@
                    EqualityComparer<Category?>.Default.Equals(Category, @do.Category);
         }
 
+        public string GetTaskState()
+        {
+            return IsCompleted ? "Completed" : "Not Completed";
+        }
+
         public override int GetHashCode()
         {
             return HashCode.Combine(Id, Title, Description, Deadline, IsCompleted, CategoryId, Category);
